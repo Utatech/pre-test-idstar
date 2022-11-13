@@ -137,6 +137,7 @@ function App() {
         // if (!res.ok) throw res.statusText;
         // return data;
         setOpen(false)
+        setOpenPost(false)
         setMessage("Berhasil Tambah User")
         setOpenSnack(true)
         fetchUserData(Number(newPage))
@@ -151,7 +152,6 @@ function App() {
       <>
         <Button variant="outlined" onClick={handleOpen}>Buat Post</Button>
         <Modal
-          hideBackdrop
           open={openPost}
           onClose={handleClose}
           aria-labelledby="child-modal-title"
