@@ -1,4 +1,4 @@
-import React, { MouseEvent, useEffect, useState } from 'react';
+import React, { MouseEvent, useEffect, useState, useRef } from 'react';
 import './App.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -37,6 +37,7 @@ function App() {
   const [posts, setPosts] = useState<Posts[]>([])
   const [totalRow, setTotalRow] = useState<number>(0)
   const [newPage, setNewPage] = useState<number>(1)
+  const [idUser, setIdUser] = useState<number | GridCellValue>(0)
   const [bodyModal, setBodyModal] = useState<{
     name: string | GridCellValue;
     gender: string | GridCellValue;
@@ -104,132 +105,86 @@ function App() {
       px: 4,
       pb: 3,
     };
-    const [open, setOpen] = React.useState(false);
+    const [openPost, setOpenPost] = React.useState(false);
+
     const handleOpen = () => {
-      setOpen(true);
+      setOpenPost(true);
     };
+
     const handleClose = () => {
-      setOpen(false);
+      setOpenPost(false);
     };
+
+    const titleRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const bodyRef = useRef() as React.MutableRefObject<HTMLInputElement>
 
     const handlePost = async () => {
-        // e.stopPropagation(); // don't select this row after clicking
-    
-        if(isCreate){
-          try {
-            const res = await axios.post(`https://gorest.co.in/public/v2/users`, 
-              {
-                name: inputValue.name,
-                gender: inputValue.gender,
-                email: inputValue.email,
-                status: inputValue.status
-              },
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
-                }
-              }
-            );
-            // const data = await res.json()
-            // console.log(data)
-            // setPosts(data)
-            // if (!res.ok) throw res.statusText;
-            // return data;
-            setOpen(false)
-            setMessage("Berhasil Tambah User")
-            setOpenSnack(true)
-            fetchUserData(Number(newPage))
-          } catch (error) {
-            console.log("error : ", error)
-            setMessage("Gagal Tambah User")
-            setOpenSnack(true)  
-          }
-        }else{
-        console.log(inputValue)
-    
-        try {
-          const res = await axios.put(`https://gorest.co.in/public/v2/users/${inputValue.id}`, 
-            {
-              name: inputValue.name,
-              gender: inputValue.gender,
-              email: inputValue.email,
-              status: inputValue.status
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
-              }
-            }
-          );
-          // const data = await res.json()
-          // if (!res.ok) throw res.statusText;
-          // setOpenSnack(true)
-          setOpen(false)
-          // return data;
-    
-          setMessage("Berhasil Edit User")
-          setOpenSnack(true)
-          fetchUserData(Number(newPage))
-        } catch (error) {
-          console.log("error : ", error)
-          setMessage("Gagal Edit User")
-          setOpenSnack(true)
-        }
-      }
-    }
+      console.log(titleRef.current.value)
+      console.log(bodyRef.current.value)
 
-    const handleChange = (e: string, w: number) =>{
-      // e.preventDefault();
-      if(w == 1){
-        setInputValuePost({
-          ...inputValuePost,
-          title: e
-        })
-      }else{
-        setInputValuePost({
-          ...inputValuePost,
-          body: e
-        })  
+      try {
+        const res = await axios.post(`https://gorest.co.in/public/v2/users/${idUser}/posts`, 
+          {
+            title: titleRef.current.value,
+            body: bodyRef.current.value
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
+            }
+          }
+        );
+        // const data = await res.json()
+        // console.log(data)
+        // setPosts(data)
+        // if (!res.ok) throw res.statusText;
+        // return data;
+        setOpen(false)
+        setMessage("Berhasil Tambah User")
+        setOpenSnack(true)
+        fetchUserData(Number(newPage))
+      } catch (error) {
+        console.log("error : ", error)
+        setMessage("Gagal Tambah User")
+        setOpenSnack(true)  
       }
     }
   
     return (
-      <React.Fragment>
+      <>
         <Button variant="outlined" onClick={handleOpen}>Buat Post</Button>
         <Modal
           hideBackdrop
-          open={open}
+          open={openPost}
           onClose={handleClose}
           aria-labelledby="child-modal-title"
           aria-describedby="child-modal-description"
         >
           <Box sx={{ ...style, width: 400 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <TextField
-                    fullWidth
-                    margin="dense"
-                    id="standard-helperText"
-                    label="Nama"
-                    variant="standard"
-                    onChange={(e) => handleChange(e.target.value, 1)}
-                  />
-                  <TextField
-                    fullWidth
-                    margin="dense"
-                    id="standard-helperText"
-                    label="Gender"
-                    variant="standard"
-                    onChange={(e) => handleChange(e.target.value, 2)}
-                  />
-                  <Button variant="outlined" onClick={handlePost}>Simpan</Button>
-                </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <TextField
+                id="child-modal-title"
+                fullWidth
+                margin="dense"
+                label="Title"
+                variant="standard"
+                inputRef={titleRef}
+              />
+              <TextField
+                id="child-modal-description"
+                fullWidth
+                margin="dense"
+                label="Body"
+                variant="standard"
+                inputRef={bodyRef}
+              />
+              <Button variant="outlined" onClick={handlePost}>Simpan</Button>
+            </Box>
           </Box>
         </Modal>
-      </React.Fragment>
+      </>
     );
   }
 
@@ -365,12 +320,15 @@ function App() {
           setIsView(true)
           setIsCreate(false)
 
+          setIdUser(thisRow.id)
+
           try {
             const res = await fetch(`https://gorest.co.in/public/v2/users/${thisRow.id}/posts`, {
               method: 'GET',
               headers: {
                 ContentType: 'application/json',
-                Accept: 'application/json'
+                Accept: 'application/json',
+                Authorization: `Bearer ${process.env.REACT_APP_TOKEN}`
               }
             });
             const data = await res.json()
@@ -445,12 +403,14 @@ function App() {
           setOpen(true)
           setIsView(false)
           setIsCreate(false)
+          setIdUser(thisRow.id)
           try {
             const res = await fetch(`https://gorest.co.in/public/v2/users/${thisRow.id}/posts`, {
               method: 'GET',
               headers: {
                 ContentType: 'application/json',
-                Accept: 'application/json'
+                Accept: 'application/json',
+                Authorization: `Bearer ${process.env.REACT_APP_TOKEN}`
               }
             });
             const data = await res.json()
