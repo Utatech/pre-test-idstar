@@ -9,7 +9,7 @@
 5. [x] Node.js & NPM Tools
 6. [x] REST API (fake) https://gorest.co.in/
 
-TUGAS TEST CASE
+## TUGAS TEST CASE
 1. [x] Silahkan membuat base project dengan menggunakan create-react-app dengan TypeScript dan React-Redux
 2. [ ] Peserta membuat halaman daftar Pengguna Dari seluruh User yang ada dengan fungsi berikut
     [ ] Buat Pengguna
