@@ -2,16 +2,16 @@
 
 
 ## TECH
-[x] Typescript
-[x] React JS (create-react-app) https://create-react-app.dev/
-[x] React-Redux https://react-redux.js.org/
-[x] Material UI https://mui.com/
-[x] Node.js & NPM Tools
-[x] REST API (fake) https://gorest.co.in/
+1. [x] Typescript
+2. [x] React JS (create-react-app) https://create-react-app.dev/
+3. [x] React-Redux https://react-redux.js.org/
+4. [x] Material UI https://mui.com/
+5. [x] Node.js & NPM Tools
+6. [x] REST API (fake) https://gorest.co.in/
 
 TUGAS TEST CASE
 1. [x] Silahkan membuat base project dengan menggunakan create-react-app dengan TypeScript dan React-Redux
-2. [ ] Silahkan membuat base project dengan menggunakan create-react-app dengan TypeScript dan React-Redux
+2. [ ] Peserta membuat halaman daftar Pengguna Dari seluruh User yang ada dengan fungsi berikut
     [ ] Buat Pengguna
     [x] Pagination
     [x] Melihat Detail Pengguna
