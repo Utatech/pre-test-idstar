@@ -5,8 +5,10 @@ import { bindActionCreators } from 'redux';
 import { actionCreators } from './state';
 import { RootState } from './state/reducers';
 import { Users, Posts } from './utils/interface'
-import { Box, Button, Container, Modal, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, IconButton, Modal, Snackbar, TextField, Typography } from '@mui/material';
 import { DataGrid, GridApi, GridCellValue, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { Close } from '@mui/icons-material';
+import axios from 'axios';
 
 function App() {
 
@@ -14,7 +16,24 @@ function App() {
   const dispatch = useDispatch();
   const { setOpen } = bindActionCreators(actionCreators, dispatch)
   
+  const [inputValue, setInputValue] = useState<{id: number | GridCellValue;name: string | GridCellValue;gender: string | GridCellValue;email: string | GridCellValue; status: string;}>({
+    id: 0,
+    name: "",
+    gender: "",
+    email: "",
+    status: "active"
+  })
+
+  const [inputValuePost, setInputValuePost] = useState<{title: string; body: string;}>({
+    title: "",
+    body: ""
+  })
+
+  const [openSnack, setOpenSnack] = useState(false)
+  const [message, setMessage] = useState("")
   const [users, setUsers] = useState<Users[]>([])
+  const [isView, setIsView] = useState(false)
+  const [isCreate, setIsCreate] = useState(false)
   const [posts, setPosts] = useState<Posts[]>([])
   const [totalRow, setTotalRow] = useState<number>(0)
   const [newPage, setNewPage] = useState<number>(1)
@@ -41,6 +60,14 @@ function App() {
     p: 4,
     borderRadius: '5px'
   };
+
+  const handleCloseSnack = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
   
   const fetchUserData = async (paramPage: number = 1) => {
     try {
@@ -62,6 +89,244 @@ function App() {
       setUsers([])
     }
   }
+
+  function ChildModal() {
+    const style = {
+      position: 'absolute' as 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 400,
+      bgcolor: 'background.paper',
+      border: '2px solid #000',
+      boxShadow: 24,
+      pt: 2,
+      px: 4,
+      pb: 3,
+    };
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => {
+      setOpen(true);
+    };
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+    const handlePost = async () => {
+        // e.stopPropagation(); // don't select this row after clicking
+    
+        if(isCreate){
+          try {
+            const res = await axios.post(`https://gorest.co.in/public/v2/users`, 
+              {
+                name: inputValue.name,
+                gender: inputValue.gender,
+                email: inputValue.email,
+                status: inputValue.status
+              },
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
+                }
+              }
+            );
+            // const data = await res.json()
+            // console.log(data)
+            // setPosts(data)
+            // if (!res.ok) throw res.statusText;
+            // return data;
+            setOpen(false)
+            setMessage("Berhasil Tambah User")
+            setOpenSnack(true)
+            fetchUserData(Number(newPage))
+          } catch (error) {
+            console.log("error : ", error)
+            setMessage("Gagal Tambah User")
+            setOpenSnack(true)  
+          }
+        }else{
+        console.log(inputValue)
+    
+        try {
+          const res = await axios.put(`https://gorest.co.in/public/v2/users/${inputValue.id}`, 
+            {
+              name: inputValue.name,
+              gender: inputValue.gender,
+              email: inputValue.email,
+              status: inputValue.status
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
+              }
+            }
+          );
+          // const data = await res.json()
+          // if (!res.ok) throw res.statusText;
+          // setOpenSnack(true)
+          setOpen(false)
+          // return data;
+    
+          setMessage("Berhasil Edit User")
+          setOpenSnack(true)
+          fetchUserData(Number(newPage))
+        } catch (error) {
+          console.log("error : ", error)
+          setMessage("Gagal Edit User")
+          setOpenSnack(true)
+        }
+      }
+    }
+
+    const handleChange = (e: string, w: number) =>{
+      // e.preventDefault();
+      if(w == 1){
+        setInputValuePost({
+          ...inputValuePost,
+          title: e
+        })
+      }else{
+        setInputValuePost({
+          ...inputValuePost,
+          body: e
+        })  
+      }
+    }
+  
+    return (
+      <React.Fragment>
+        <Button variant="outlined" onClick={handleOpen}>Buat Post</Button>
+        <Modal
+          hideBackdrop
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="child-modal-title"
+          aria-describedby="child-modal-description"
+        >
+          <Box sx={{ ...style, width: 400 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <TextField
+                    fullWidth
+                    margin="dense"
+                    id="standard-helperText"
+                    label="Nama"
+                    variant="standard"
+                    onChange={(e) => handleChange(e.target.value, 1)}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="dense"
+                    id="standard-helperText"
+                    label="Gender"
+                    variant="standard"
+                    onChange={(e) => handleChange(e.target.value, 2)}
+                  />
+                  <Button variant="outlined" onClick={handlePost}>Simpan</Button>
+                </Box>
+          </Box>
+        </Modal>
+      </React.Fragment>
+    );
+  }
+
+  const action = (
+    <>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleCloseSnack}
+      >
+        <Close fontSize="small" />
+      </IconButton>
+    </>
+  );
+
+  const handlePostUser = async () => {
+    // e.stopPropagation(); // don't select this row after clicking
+
+    if(isCreate){
+      try {
+        const res = await axios.post(`https://gorest.co.in/public/v2/users`, 
+          {
+            name: inputValue.name,
+            gender: inputValue.gender,
+            email: inputValue.email,
+            status: inputValue.status
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
+            }
+          }
+        );
+        // const data = await res.json()
+        // console.log(data)
+        // setPosts(data)
+        // if (!res.ok) throw res.statusText;
+        // return data;
+        setOpen(false)
+        setMessage("Berhasil Tambah User")
+        setOpenSnack(true)
+        fetchUserData(Number(newPage))
+      } catch (error) {
+        console.log("error : ", error)
+        setMessage("Gagal Tambah User")
+        setOpenSnack(true)  
+      }
+    }else{
+    console.log(inputValue)
+
+    try {
+      const res = await axios.put(`https://gorest.co.in/public/v2/users/${inputValue.id}`, 
+        {
+          name: inputValue.name,
+          gender: inputValue.gender,
+          email: inputValue.email,
+          status: inputValue.status
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${process.env.REACT_APP_TOKEN}`
+          }
+        }
+      );
+      // const data = await res.json()
+      // if (!res.ok) throw res.statusText;
+      // setOpenSnack(true)
+      setOpen(false)
+      // return data;
+
+      setMessage("Berhasil Edit User")
+      setOpenSnack(true)
+      fetchUserData(Number(newPage))
+    } catch (error) {
+      console.log("error : ", error)
+      setMessage("Gagal Edit User")
+      setOpenSnack(true)
+    }
+  }
+  }
+
+  const handleOpenCreate = () => {
+    console.log("asdasd")
+    setBodyModal({
+      name: "",
+      gender: "",
+      email: ""
+    })
+    setOpen(true)
+    setIsView(false)
+    setIsCreate(true)
+  };
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', type: 'number', flex: 1},
@@ -97,6 +362,8 @@ function App() {
             email: thisRow.email
           })
           setOpen(true)
+          setIsView(true)
+          setIsCreate(false)
 
           try {
             const res = await fetch(`https://gorest.co.in/public/v2/users/${thisRow.id}/posts`, {
@@ -116,12 +383,92 @@ function App() {
             setUsers([])
           }
         };
+
+        const handleDelete = async (e: MouseEvent<HTMLElement>) => {
+          e.stopPropagation(); // don't select this row after clicking
+  
+          const api: GridApi = params.api;
+          const thisRow: Record<string, GridCellValue> = {};
+  
+          api
+            .getAllColumns()
+            .filter((c) => c.field !== "__check__" && !!c)
+            .forEach(
+              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
+            );
+          console.log(thisRow)
+          try {
+            const res = await fetch(`https://gorest.co.in/public/v2/users/${thisRow.id}`, {
+              method: 'DELETE',
+              headers: {
+                ContentType: 'application/json',
+                Accept: 'application/json',
+                Authorization: `Bearer ${process.env.REACT_APP_TOKEN}`
+              }
+            });
+            const data = await res.json()
+            if (!res.ok) throw res.statusText;
+            setMessage("Berhasil Hapus User")
+            setOpenSnack(true)
+            return data;
+          } catch (error) {
+            console.log("error : ", error)
+            setOpenSnack(true)
+          }
+          fetchUserData(Number(newPage))
+        }
+
+        const handleEdit = async (e: MouseEvent<HTMLElement>) => {
+          e.stopPropagation(); // don't select this row after clicking
+  
+          const api: GridApi = params.api;
+          const thisRow: Record<string, GridCellValue> = {};
+  
+          api
+            .getAllColumns()
+            .filter((c) => c.field !== "__check__" && !!c)
+            .forEach(
+              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
+            );
+          setInputValue({
+            ...inputValue,
+            id: thisRow.id,
+            name: thisRow.name,
+            gender: thisRow.gender,
+            email: thisRow.email
+          })
+          setBodyModal({
+            name: thisRow.name,
+            gender: thisRow.gender,
+            email: thisRow.email
+          })
+          setOpen(true)
+          setIsView(false)
+          setIsCreate(false)
+          try {
+            const res = await fetch(`https://gorest.co.in/public/v2/users/${thisRow.id}/posts`, {
+              method: 'GET',
+              headers: {
+                ContentType: 'application/json',
+                Accept: 'application/json'
+              }
+            });
+            const data = await res.json()
+            console.log(data)
+            setPosts(data)
+            if (!res.ok) throw res.statusText;
+            return data;
+          } catch (error) {
+            console.log("error : ", error)
+            setUsers([])
+          }
+        }
   
         return (
           <>
             <Button onClick={handleOpen}>VIEW</Button>
-            <Button onClick={handleOpen}>EDIT</Button>
-            <Button onClick={handleOpen}>DELETE</Button>
+            <Button onClick={handleEdit}>EDIT</Button>
+            <Button onClick={handleDelete}>DELETE</Button>
           </>
         )
       }
@@ -129,10 +476,8 @@ function App() {
   ];
 
   const columnsDetail: GridColDef[] = [
-    { field: 'id', headerName: 'id', flex: 1},
-    { field: 'user_id', headerName: 'user_id',type: 'number', flex: 1},
-    { field: 'title', headerName: 'title', flex: 3},
-    { field: 'body', headerName: 'body', flex: 2}
+    { field: 'title', headerName: 'Title', flex: 3},
+    { field: 'body', headerName: 'Body', flex: 2}
   ];
 
   useEffect(() => {
@@ -146,7 +491,7 @@ function App() {
         <Box sx={{ height: '100vh' }} >
           <Box component="h1" pt={2} sx={{ textAlign: 'center', height: '40px', display: 'inline-block' }}>Daftar Pengguna</Box>
           <Box sx={{ display: 'flex', justifyContent: 'end'}}>
-            <Button variant="outlined">Buat Pengguna</Button>
+            <Button variant="outlined" onClick={handleOpenCreate}>Buat Pengguna</Button>
           </Box>
           <Box p={2} mt={2} sx={{ bgcolor: '#F8F9FA', height: '100vh', borderRadius: '10px' }}>
           <DataGrid
@@ -169,27 +514,82 @@ function App() {
                 Lihat Pengguna
               </Typography>
               <Typography component="div" id="modal-modal-description" sx={{ mt: 3 }}>
-                <Box component="span" sx={{ height: '20px', display: 'block' }} mt={1}>Nama : {bodyModal.name}</Box>
-                <Box component="span" sx={{ height: '20px', display: 'block' }} mt={1}>Gender : {bodyModal.gender}</Box>
-                <Box component="span" sx={{ height: '20px', display: 'block' }} mt={1}>Email : {bodyModal.email}</Box>
-
-                <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between'}} mt={3}>
-                  <Box component="span" sx={{ fontWeight: 700 }}>Daftar Pengguna</Box>
-                  <Button variant="outlined">Buat Post</Button>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <TextField
+                    fullWidth
+                    margin="dense"
+                    id="standard-helperText"
+                    label="Nama"
+                    defaultValue={bodyModal.name}
+                    variant="standard"
+                    InputProps={{
+                      readOnly: isView,
+                    }}
+                    onBlur={(e) => setInputValue({
+                      ...inputValue,
+                      name: e.target.value
+                    })}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="dense"
+                    id="standard-helperText"
+                    label="Gender"
+                    defaultValue={bodyModal.gender}
+                    variant="standard"
+                    InputProps={{
+                      readOnly: isView,
+                    }}
+                    onBlur={(e) => setInputValue({
+                      ...inputValue,
+                      gender: e.target.value
+                    })}
+                  />
+                  <TextField
+                    fullWidth
+                    margin="dense"
+                    id="standard-helperText"
+                    label="Email"
+                    defaultValue={bodyModal.email}
+                    variant="standard"
+                    InputProps={{
+                      readOnly: isView,
+                    }}
+                    onBlur={(e) => setInputValue({
+                      ...inputValue,
+                      email: e.target.value
+                    })}
+                  />
+                  { !isView && <Button variant="outlined" onClick={handlePostUser}>Simpan</Button>}
                 </Box>
-                <Box sx={{ height: '300px' }}>
-                  <DataGrid
-                    rows={posts}
-                    columns={columnsDetail}
-                    pageSize={10}
-                    rowsPerPageOptions={[10]}
-                    />
-                </Box>
+                {!isCreate && (
+                  <>
+                    <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between'}} mt={3}>
+                      <Box component="span" sx={{ fontWeight: 700 }}>Daftar Post</Box>
+                      <ChildModal />
+                    </Box>
+                    <Box sx={{ height: '200px' }}>
+                      <DataGrid
+                        rows={posts}
+                        columns={columnsDetail}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        />
+                    </Box>
+                  </>
+                )}
               </Typography>
             </Box>
           </Modal>
           </Box>
         </Box>
+        <Snackbar
+            open={openSnack}
+            autoHideDuration={6000}
+            onClose={handleCloseSnack}
+            message={message}
+            action={action}
+          />
       </Container>
     </div>
   );
