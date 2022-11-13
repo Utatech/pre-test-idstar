@@ -6,7 +6,7 @@ import { actionCreators } from './state';
 import { RootState } from './state/reducers';
 import { Users, Posts } from './utils/interface'
 import { Box, Button, Container, IconButton, Modal, Snackbar, TextField, Typography } from '@mui/material';
-import { DataGrid, GridApi, GridCellValue, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridApi, GridCellValue, GridColDef } from '@mui/x-data-grid';
 import { Close } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -22,11 +22,6 @@ function App() {
     gender: "",
     email: "",
     status: "active"
-  })
-
-  const [inputValuePost, setInputValuePost] = useState<{title: string; body: string;}>({
-    title: "",
-    body: ""
   })
 
   const [openSnack, setOpenSnack] = useState(false)
@@ -123,7 +118,7 @@ function App() {
       console.log(bodyRef.current.value)
 
       try {
-        const res = await axios.post(`https://gorest.co.in/public/v2/users/${idUser}/posts`, 
+        await axios.post(`https://gorest.co.in/public/v2/users/${idUser}/posts`, 
           {
             title: titleRef.current.value,
             body: bodyRef.current.value
@@ -206,7 +201,7 @@ function App() {
 
     if(isCreate){
       try {
-        const res = await axios.post(`https://gorest.co.in/public/v2/users`, 
+        await axios.post(`https://gorest.co.in/public/v2/users`, 
           {
             name: inputValue.name,
             gender: inputValue.gender,
@@ -239,7 +234,7 @@ function App() {
     console.log(inputValue)
 
     try {
-      const res = await axios.put(`https://gorest.co.in/public/v2/users/${inputValue.id}`, 
+      await axios.put(`https://gorest.co.in/public/v2/users/${inputValue.id}`, 
         {
           name: inputValue.name,
           gender: inputValue.gender,

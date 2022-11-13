@@ -7,8 +7,7 @@ import { Provider } from 'react-redux';
 import { store } from './state';
 import {
   createBrowserRouter,
-  RouterProvider,
-  Route,
+  RouterProvider
 } from "react-router-dom";
 
 const router = createBrowserRouter([
