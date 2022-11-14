@@ -19,7 +19,7 @@ Link : https://pre-test-idstar.vercel.app/
     - [x] Hapus Pengguna
     - [x] Update Pengguna
 
-3.  [ ] Peserta membuat halaman Detail Pengguna, dalam halaman ini ditampilkan semua Informasi Pengguna dan daftar posts milik Pengguna (/public/v2/users/100/posts). Berikan juga fungsi buat post dan hapus post dengan model tampilan Dialog Box
+3.  [x] Peserta membuat halaman Detail Pengguna, dalam halaman ini ditampilkan semua Informasi Pengguna dan daftar posts milik Pengguna (/public/v2/users/100/posts). Berikan juga fungsi buat post dan hapus post dengan model tampilan Dialog Box
     - [x] Peserta membuat halaman Detail Pengguna, dalam halaman ini ditampilkan semua Informasi Pengguna dan daftar posts milik Pengguna (/public/v2/users/100/posts). 
     - [x] Berikan juga fungsi buat post dan hapus post dengan model tampilan Dialog Box.
         - Untuk poin **hapus post** tidak bisa dibuat karena dari pihak gorest.co.in tidak menyediakan endpoint tersebut

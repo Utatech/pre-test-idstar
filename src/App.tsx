@@ -138,12 +138,12 @@ function App() {
         // return data;
         setOpen(false)
         setOpenPost(false)
-        setMessage("Berhasil Tambah User")
+        setMessage("Berhasil Tambah Posts")
         setOpenSnack(true)
         fetchUserData(Number(newPage))
       } catch (error) {
         console.log("error : ", error)
-        setMessage("Gagal Tambah User")
+        setMessage("Gagal Tambah Posts")
         setOpenSnack(true)  
       }
     }
@@ -158,6 +158,12 @@ function App() {
           aria-describedby="child-modal-description"
         >
           <Box sx={{ ...style, width: 400 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <Box>
+                Dialog Box - Buat Post
+              </Box>
+              <Button variant="outlined" onClick={handlePost}>Simpan</Button>
+            </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <TextField
                 id="child-modal-title"
@@ -174,8 +180,8 @@ function App() {
                 label="Body"
                 variant="standard"
                 inputRef={bodyRef}
+                multiline
               />
-              <Button variant="outlined" onClick={handlePost}>Simpan</Button>
             </Box>
           </Box>
         </Modal>
